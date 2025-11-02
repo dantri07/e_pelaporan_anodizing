@@ -135,7 +135,7 @@ class ActionController extends Controller
             $action = $this->actionService->getActionById($id);
             
             // Check if the current user is the technician who created the action or an admin
-            if ($action->technician_id !== auth()->id()) {
+            if ($action->technician_id !== auth()->id() && !auth()->user()->hasRole('admin')) {
                 abort(403, 'You are not authorized to edit this action.');
             }
             

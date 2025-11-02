@@ -9,7 +9,7 @@
                     <h3 class="card-title">Create New Action</h3>
                     <div class="card-tools">
                         @if(request()->has('report_id'))
-                            <a href="{{ route('machine-reports.edit', request()->report_id) }}" class="btn btn-default btn-sm">
+                            <a href="{{ route('machine-reports.index', request()->report_id) }}" class="btn btn-default btn-sm">
                                 <i class="fas fa-arrow-left"></i> Back to Report
                             </a>
                         @else

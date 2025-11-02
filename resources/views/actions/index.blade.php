@@ -51,8 +51,8 @@ $(function() {
         columns: [
             { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false },
             { 
-                data: 'action_status', 
-                name: 'action_status',
+                data: 'status', 
+                name: 'status',
                 render: function(data) {
                     let badgeClass = 'info';
                     if (data === 'Completed') badgeClass = 'success';
@@ -60,9 +60,9 @@ $(function() {
                     return `<span class="badge badge-${badgeClass}">${data}</span>`;
                 }
             },
-            { data: 'action_description', name: 'action_description' },
-            { data: 'action_date', name: 'action_date' },
-            { data: 'technician', name: 'technician' },
+            { data: 'description', name: 'description' },
+            { data: 'date', name: 'date' },
+            { data: 'technician_id', name: 'technician_id' },
             { 
                 data: 'machine_report', 
                 name: 'machine_report',
@@ -74,16 +74,16 @@ $(function() {
                 }
             },
             { 
-                data: 'spare_part', 
-                name: 'spare_part',
+                data: 'spare_part_id', 
+                name: 'spare_part_id',
                 render: function(data) {
                     if (!data) return '-';
                     return `<span class="text-muted">${data.name}</span>`;
                 }
             },
             { 
-                data: 'spare_part_quantity', 
-                name: 'spare_part_quantity',
+                data: 'quantity', 
+                name: 'quantity',
                 render: function(data) {
                     return data || '-';
                 }

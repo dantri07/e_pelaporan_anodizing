@@ -9,7 +9,7 @@
                     <h3 class="card-title">Edit Action</h3>
                     <div class="card-tools">
                         @if($action->machineReports->isNotEmpty())
-                            <a href="{{ route('machine-reports.edit', $action->machineReports->first()->id) }}" class="btn btn-default btn-sm">
+                            <a href="{{ route('machine-reports.index', $action->machineReports->first()->id) }}" class="btn btn-default btn-sm">
                                 <i class="fas fa-arrow-left"></i> Back to Report
                             </a>
                         @else
@@ -43,7 +43,7 @@
                     </div>
                 @endif
 
-                <form action="{{ route('actions.update', $action->action_id) }}" method="POST">
+                <form action="{{ route('actions.update', $action->action_id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
                     <div class="card-body">

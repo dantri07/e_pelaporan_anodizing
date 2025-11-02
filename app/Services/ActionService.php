@@ -90,44 +90,68 @@ class ActionService
         DB::beginTransaction();
         try {
             $action = Action::findOrFail($id);
+
+            // Simpan nilai lama SEBELUM di-update
             $oldSparePartId = $action->spare_part_id;
             $oldQuantity = $action->quantity;
-            $action->update($data);
-            if (!empty($data['spare_part_id']) && !empty($data['quantity'])) {
-                if ($oldSparePartId && $oldSparePartId != $data['spare_part_id']) {
-                    $oldSparePart = SparePart::find($oldSparePartId);
-                    if ($oldSparePart) {
+
+            // Dapatkan nilai baru dari data request
+            $newSparePartId = $data['spare_part_id'] ?? null;
+            $newQuantity = $data['quantity'] ?? null;
+
+            // 1. Logika Pengembalian Stok (jika part lama ada)
+            if ($oldSparePartId) {
+                $oldSparePart = SparePart::find($oldSparePartId);
+                if ($oldSparePart) {
+                    // Jika part diganti ATAU dihapus, kembalikan stok lama
+                    if ($oldSparePartId != $newSparePartId) {
                         $oldSparePart->increment('quantity', $oldQuantity);
                     }
-                }
-                if ($oldSparePartId == $data['spare_part_id'] && $oldQuantity != $data['quantity']) {
-                    $sparePart = SparePart::find($data['spare_part_id']);
-                    $difference = $oldQuantity - $data['quantity'];
-                    if ($difference > 0) {
-                        $sparePart->increment('quantity', $difference);
-                    } else {
-                        $sparePart->decrement('quantity', abs($difference));
+                    // Jika part sama tapi kuantitas berubah
+                    else if ($oldQuantity != $newQuantity) {
+                        $difference = $oldQuantity - $newQuantity; // 5 lama, 2 baru = 3 (kembalikan 3)
+                        if ($difference > 0) {
+                            $oldSparePart->increment('quantity', $difference);
+                        } else {
+                            $oldSparePart->decrement('quantity', abs($difference)); // 2 lama, 5 baru = -3 (kurangi 3)
+                        }
                     }
-                } else {
-                    $sparePart = SparePart::find($data['spare_part_id']);
-                    $sparePart->decrement('quantity', $data['quantity']);
                 }
             }
-            // Handle images
+
+            // 2. Logika Pengurangan Stok (jika part baru ditambahkan & berbeda dari yg lama)
+            // (Kasus kuantitas part yg sama sudah ditangani di atas)
+            if ($newSparePartId && $newSparePartId != $oldSparePartId) {
+                $newSparePart = SparePart::find($newSparePartId);
+                if ($newSparePart && $newQuantity > 0) {
+                    // Pastikan stok cukup (validasi sudah ada di Request, tapi baik untuk double check)
+                    if ($newSparePart->quantity < $newQuantity) {
+                         throw new \Exception('The quantity exceeds available stock (' . $newSparePart->quantity . ').');
+                    }
+                    $newSparePart->decrement('quantity', $newQuantity);
+                }
+            }
+
+            // 3. Update data action
+            $action->update($data);
+
+            // 4. Handle images
             if ($files && is_array($files)) {
                 foreach ($files as $file) {
                     $path = $file->store('action_images', 'public');
                     $action->images()->create(['file_path' => $path]);
                 }
             }
+
             DB::commit();
             return $action;
+
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('ActionService@updateAction error', ['error' => $e->getMessage()]); // Tambahkan logging
             throw $e;
         }
     }
-
     /**
      * Delete action
      *
