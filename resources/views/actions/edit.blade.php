@@ -61,7 +61,13 @@
                         @endif
                         <div class="form-group">
                             <label for="status">Status</label>
-                            <input type="text" class="form-control @error('status') is-invalid @enderror" id="status" name="status" value="{{ old('status', $action->status) }}" required>
+                            <Select class="form-control @error('status') is-invalid @enderror" id="status" name= "status" required>
+                                <option value="">-- Select Status --</option>
+                                <option value="sudah diperbaiki" {{ old('status') == 'In Progress' ? 'selected' : '' }}>Sudah diperbaiki</option>
+                                <option value="belum diperbaiki" {{ old('status') == 'On Hold' ? 'selected' : '' }}>Belum diperbaiki</option>
+                                <option value="menunggu suku cadang" {{ old('status') == 'Resolved' ? 'selected' : '' }}>Menunggu suku cadang</option>
+                                <option value="dalam perbaikan" {{ old('status') == 'Closed' ? 'selected' : '' }}>Dalam perbaikan</option>
+                            </Select>
                             @error('status')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
