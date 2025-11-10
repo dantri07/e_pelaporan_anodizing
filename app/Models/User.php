@@ -46,4 +46,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function machineReports()
+    {
+        // Pastikan nama Modelnya benar, yaitu MachineReport::class
+        return $this->hasMany(MachineReport::class, 'user_id');
+    }
+    public function actions()
+    {
+        // Pastikan nama Modelnya benar, yaitu Action::class
+        return $this->hasMany(Action::class, 'user_id');
+    }
 }

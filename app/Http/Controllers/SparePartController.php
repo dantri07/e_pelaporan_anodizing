@@ -100,6 +100,12 @@ class SparePartController extends Controller
     public function destroy($id)
     {
         try {
+            $actionCount = \App\Models\Action::where('spare_part_id', $id)->count();
+            if ($actionCount > 0) {
+            return response()->json([
+                'error' => 'Spare part cannot be deleted because it has been used in ' . $actionCount . ' action(s).'
+            ], 409); 
+        }
             $this->sparePartService->deleteSparePart($id);
             return response()->json(['success' => 'Spare part deleted successfully.']);
         } catch (\Exception $e) {
